@@ -14,7 +14,7 @@ if (!require(librarian)){
   library(librarian)
 }
 librarian::shelf(
-  clockify, dplyr, lubridate, metajam, here, tidyverse)
+  clockify, dplyr, lubridate, metajam, here, tidyverse, Hmisc)
 ```
 
 ```{r}
@@ -22,12 +22,26 @@ librarian::shelf(
 ug_secondaryGER <-read_csv(here("data", "GER_Secondary_Enrollment_Rates_By_District.csv"), na = "-") %>% pivot_longer(!District, names_to = "Years", values_to = "GER") %>% 
   mutate(
     region = case_when(
-      District %in% c("Abim","Adjumani")  ~ "Northern", 
-      District %in% c("Buikwe", "Bukomansimbi", "Butambala", "Buvuma", "Gomba", "Kalangala", "Kalungu", "Kampala", "Kasanda", "Kayunga", "Kiboga", "Kyankwanzi", "Kyotera", "Luweero", "Lwengo", "Lyantonde", "Masaka", "Mityana", "Mpigi", "Mubende", "Mukono", "Nakaseke", "Nakasongola", "Rakai", "Sembabule", "Wakiso") ~ "Central"
+      District %in% c("Abim","Adjumani", "Agago", "Alebtong", "Amolatar", "Amudat", "Amuru", "Apac", "Arua", "Dokolo", "Gulu", "Kaabong", "Kitgum", "Koboko"  , "Kole", 	"Kotido", "Lamwo",	"Lira", "Maracha",	"Moroto", "Moyo",	"Nakapiripirit", "Napak",	"Nebbi", "Nwoya",	"Otuke", "Oyam",	"Pader",	"Yumbe",	"Zombo")  ~ "Northern", 
+      
+      District %in% c("Buikwe", "Bukomansimbi", "Butambala", "Buvuma", "Gomba", "Kalangala", "Kalungu", "Kampala", "Kasanda", "Kayunga", "Kiboga", "Kyankwanzi", "Kyotera", "Luweero", "Lwengo", "Lyantonde", "Masaka", "Mityana", "Mpigi", "Mubende", "Mukono", "Nakaseke", "Nakasongola", "Rakai", "Sembabule", "Wakiso") ~ "Central",
+      District %in% c("Amuria", "Budaka", "Bududa", "Bugiri", "Bugweri", "Bukedea", "Bukwo", "Bulambuli",   "Busia",       "Butaleja",    "Butebo" ,    "Buyende"  ,   "Iganga"  ,    "Jinja"  ,"Kaberamaido", "Kaliro"  ,    "Kamuli" ,     "Kapchorwa"  , "Kapelebyong" ,"Katakwi"  ,   "Kibuku", "Kumim",       "Kween" ,      "Luuka",       "Manafwa" ,    "Mayuge",      "Mbale",       "Namayingo", "Namisindwa",  "Namutumba" ,  "Ngora" ,      "Pallisa" ,    "Serere" ,     "Sironko" ,    "Soroti" ,"Tororo" ) ~ "Eastern", 
+      District %in% c("Buhweju", "Buliisa","Bundibugyo","Bunyangabu","Bushenyi","Hoima" ,"Ibanda",
+                      "Isingiro" ,"Kabale" , "Kabarole" ,"Kagadi" ,"Kakumiro" ,"Kamwenge","Kanungu",
+                      "Kasese" ,"Kazo", "Kibaale","Kikuube" ,"Kiruhura","Kiryandongo", "Kisoro", "Kitagwenda",  "Kyegegwa", "Kyenjojo", "Masindi" ,"Mbarara","Mitooma","Ntoroko" , "Ntungamo" ,   "Rubanda"  ,   "Rubirizi" ,   "Rukiga" ,     "Rukungiri" ,  "Rwampara" ,   "Sheema") ~ "Western"
     ))
 
-
-ug_secondaryNER <-read_csv(here("data", "NER_Secondary_Enrollment_Rates_By_District.csv"), na = "-") %>% pivot_longer(!District, names_to = "Years", values_to = "NER")
+ug_secondaryNER <-read_csv(here("data", "NER_Secondary_Enrollment_Rates_By_District.csv"), na = "-") %>% pivot_longer(!District, names_to = "Years", values_to = "NER") %>% 
+   mutate(
+    region = case_when(
+      District %in% c("Abim","Adjumani", "Agago", "Alebtong", "Amolatar", "Amudat", "Amuru", "Apac", "Arua", "Dokolo", "Gulu", "Kaabong", "Kitgum", "Koboko"  , "Kole", 	"Kotido", "Lamwo",	"Lira", "Maracha",	"Moroto", "Moyo",	"Nakapiripirit", "Napak",	"Nebbi", "Nwoya",	"Otuke", "Oyam",	"Pader",	"Yumbe",	"Zombo")  ~ "Northern", 
+      
+      District %in% c("Buikwe", "Bukomansimbi", "Butambala", "Buvuma", "Gomba", "Kalangala", "Kalungu", "Kampala", "Kasanda", "Kayunga", "Kiboga", "Kyankwanzi", "Kyotera", "Luweero", "Lwengo", "Lyantonde", "Masaka", "Mityana", "Mpigi", "Mubende", "Mukono", "Nakaseke", "Nakasongola", "Rakai", "Sembabule", "Wakiso") ~ "Central",
+      District %in% c("Amuria", "Budaka", "Bududa", "Bugiri", "Bugweri", "Bukedea", "Bukwo", "Bulambuli",   "Busia",       "Butaleja",    "Butebo" ,    "Buyende"  ,   "Iganga"  ,    "Jinja"  ,"Kaberamaido", "Kaliro"  ,    "Kamuli" ,     "Kapchorwa"  , "Kapelebyong" ,"Katakwi"  ,   "Kibuku", "Kumim",       "Kween" ,      "Luuka",       "Manafwa" ,    "Mayuge",      "Mbale",       "Namayingo", "Namisindwa",  "Namutumba" ,  "Ngora" ,      "Pallisa" ,    "Serere" ,     "Sironko" ,    "Soroti" ,"Tororo" ) ~ "Eastern", 
+      District %in% c("Buhweju", "Buliisa","Bundibugyo","Bunyangabu","Bushenyi","Hoima" ,"Ibanda",
+                      "Isingiro" ,"Kabale" , "Kabarole" ,"Kagadi" ,"Kakumiro" ,"Kamwenge","Kanungu",
+                      "Kasese" ,"Kazo", "Kibaale","Kikuube" ,"Kiruhura","Kiryandongo", "Kisoro", "Kitagwenda",  "Kyegegwa", "Kyenjojo", "Masindi" ,"Mbarara","Mitooma","Ntoroko" , "Ntungamo" ,   "Rubanda"  ,   "Rubirizi" ,   "Rukiga" ,     "Rukungiri" ,  "Rwampara" ,   "Sheema") ~ "Western"
+    ))
 ```
 
 P7_comp	Male 	2013	68
@@ -60,7 +74,7 @@ ggplot(data = primary, aes(x = Year, y = Number, col = Schooling)) +
 
 
 ```{r}
-ggplot(data = ug_secondaryGER, aes(x = Years, y = GER)) +
+ggplot(data = ug_secondaryGER, aes(x = Years, y = GER, col = region)) +
   geom_point()
 ```
 
