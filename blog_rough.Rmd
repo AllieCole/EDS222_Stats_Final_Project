@@ -22,20 +22,8 @@ librarian::shelf(
 ug_secondaryGER <-read_csv(here("data", "GER_Secondary_Enrollment_Rates_By_District.csv"), na = "-") %>% pivot_longer(!District, names_to = "Years", values_to = "GER") %>% 
   mutate(
     region = case_when(
-      District == "Abim" ~ "Northern",
-      District == "Adjumani" ~ "Northern",
-      District == "Agago" ~ "Northern",
-      District == "Alebtong" ~ "Northern",
-      District == "Amolatar" ~ "Northern",
-      District == "Amudat" ~ "Northern",
-      District == "Amuru" ~ "Northern",
-      District == "Apac" ~ "Northern",
-      District == "Arua" ~ "Northern",
-      District == "Dokolo" ~ "Northern",
-      District == "Gulu" ~ "Northern",
-      District == "Kaabong" ~ "Northern", 
-      District == "Kitgum" ~ "Northern", 
-      District == "Koboko" ~ "Northern"
+      District %in% c("Abim","Adjumani")  ~ "Northern", 
+      District %in% c("Buikwe", "Bukomansimbi", "Butambala", "Buvuma", "Gomba", "Kalangala", "Kalungu", "Kampala", "Kasanda", "Kayunga", "Kiboga", "Kyankwanzi", "Kyotera", "Luweero", "Lwengo", "Lyantonde", "Masaka", "Mityana", "Mpigi", "Mubende", "Mukono", "Nakaseke", "Nakasongola", "Rakai", "Sembabule", "Wakiso") ~ "Central"
     ))
 
 
