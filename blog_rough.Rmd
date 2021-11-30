@@ -20,6 +20,7 @@ librarian::shelf(
 ```{r}
 #Uganda Beauro of Stats 
 ug_secondaryGER <-read_csv(here("data", "GER_Secondary_Enrollment_Rates_By_District.csv"), na = "-") %>% pivot_longer(!District, names_to = "Years", values_to = "GER") %>% 
+  mutate(Years = lubridate::Y(Years))
   mutate(
     region = case_when(
       District %in% c("Abim","Adjumani", "Agago", "Alebtong", "Amolatar", "Amudat", "Amuru", "Apac", "Arua", "Dokolo", "Gulu", "Kaabong", "Kitgum", "Koboko"  , "Kole", 	"Kotido", "Lamwo",	"Lira", "Maracha",	"Moroto", "Moyo",	"Nakapiripirit", "Napak",	"Nebbi", "Nwoya",	"Otuke", "Oyam",	"Pader",	"Yumbe",	"Zombo")  ~ "Northern", 
@@ -99,6 +100,8 @@ ggplot(data = ug_secondaryGER, aes(x = Years, y = GER, col = region)) +
   summary() %>% 
   xtable() %>% 
   kable(caption = "Think Of a Captaion", digits = 4)
+
+lm(GER ~ Years, data = ug_secondaryGER) #need to turn dates into numeric 
 
 ```
 
