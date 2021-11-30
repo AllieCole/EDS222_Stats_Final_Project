@@ -14,7 +14,7 @@ if (!require(librarian)){
   library(librarian)
 }
 librarian::shelf(
-  clockify, dplyr, lubridate, metajam, here, tidyverse, Hmisc)
+  clockify, dplyr, lubridate, metajam, here, tidyverse, Hmisc, kableExtra, xtable, readr)
 ```
 
 ```{r}
@@ -42,6 +42,22 @@ ug_secondaryNER <-read_csv(here("data", "NER_Secondary_Enrollment_Rates_By_Distr
                       "Isingiro" ,"Kabale" , "Kabarole" ,"Kagadi" ,"Kakumiro" ,"Kamwenge","Kanungu",
                       "Kasese" ,"Kazo", "Kibaale","Kikuube" ,"Kiruhura","Kiryandongo", "Kisoro", "Kitagwenda",  "Kyegegwa", "Kyenjojo", "Masindi" ,"Mbarara","Mitooma","Ntoroko" , "Ntungamo" ,   "Rubanda"  ,   "Rubirizi" ,   "Rukiga" ,     "Rukungiri" ,  "Rwampara" ,   "Sheema") ~ "Western"
     ))
+```
+
+
+```{r}
+### World food program Food prices 
+
+wfp_food_prices_uga_raw <- read_csv("data/wfp_food_prices_uga.csv", 
+    col_types = cols(admin2 = col_skip(), 
+        latitude = col_skip(), longitude = col_skip(), 
+        category = col_skip())) %>% 
+  mutate(date = lubridate::ymd(date))
+
+fp <- wfp_food_prices_uga_raw[-1,]
+
+#%>% 
+  filter(date >= as.Date("2012-01-01") & date <= as.Date(2017-12-31))
 ```
 
 P7_comp	Male 	2013	68
@@ -75,9 +91,25 @@ ggplot(data = primary, aes(x = Year, y = Number, col = Schooling)) +
 
 ```{r}
 ggplot(data = ug_secondaryGER, aes(x = Years, y = GER, col = region)) +
-  geom_point()
+  geom_point() 
 ```
 
+```{r}
+ lm(GER ~ region, data = ug_secondaryGER)  %>%
+  summary() %>% 
+  xtable() %>% 
+  kable(caption = "Think Of a Captaion", digits = 4)
 
+```
+
+```{r}
+ lm(Number ~ Sex + Schooling, data = primary)  %>% 
+  summary()
+  
+  #%>%
+  summary() %>% 
+  xtable() %>% 
+  kable(caption = "Think Of a Captaion", digits = 4)
+```
 
 
