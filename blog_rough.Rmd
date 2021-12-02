@@ -14,13 +14,12 @@ if (!require(librarian)){
   library(librarian)
 }
 librarian::shelf(
-  clockify, dplyr, lubridate, metajam, here, tidyverse, Hmisc, kableExtra, xtable, readr)
+  clockify, dplyr, lubridate, metajam, here, tidyverse, Hmisc, kableExtra, xtable, readr, patchwork)
 ```
 
 ```{r}
 #Uganda Beauro of Stats 
-ug_secondaryGER <-read_csv(here("data", "GER_Secondary_Enrollment_Rates_By_District.csv"), 
-                           na.omit("region"),
+ug_secondaryGER_raw <-read_csv(here("data", "Secondary_GER_Rates.csv"), 
                            na = "-", 
                            col_types = cols(`2012` = col_number(), 
                                             `2013` = col_number(), 
@@ -29,18 +28,27 @@ ug_secondaryGER <-read_csv(here("data", "GER_Secondary_Enrollment_Rates_By_Distr
                                             `2016` = col_number(),
                                             `2017` = col_number())) %>% 
   pivot_longer(!District, names_to = "Years", values_to = "GER") %>% 
-  mutate(
-    region = case_when(
+  mutate(region = case_when(
       District %in% c("Abim","Adjumani", "Agago", "Alebtong", "Amolatar", "Amudat", "Amuru", "Apac", "Arua", "Dokolo", "Gulu", "Kaabong", "Kitgum", "Koboko"  , "Kole", 	"Kotido", "Lamwo",	"Lira", "Maracha",	"Moroto", "Moyo",	"Nakapiripirit", "Napak",	"Nebbi", "Nwoya",	"Otuke", "Oyam",	"Pader",	"Yumbe",	"Zombo")  ~ "Northern", 
       
       District %in% c("Buikwe", "Bukomansimbi", "Butambala", "Buvuma", "Gomba", "Kalangala", "Kalungu", "Kampala", "Kasanda", "Kayunga", "Kiboga", "Kyankwanzi", "Kyotera", "Luweero", "Lwengo", "Lyantonde", "Masaka", "Mityana", "Mpigi", "Mubende", "Mukono", "Nakaseke", "Nakasongola", "Rakai", "Sembabule", "Wakiso") ~ "Central",
       District %in% c("Amuria", "Budaka", "Bududa", "Bugiri", "Bugweri", "Bukedea", "Bukwo", "Bulambuli",   "Busia",       "Butaleja",    "Butebo" ,    "Buyende"  ,   "Iganga"  ,    "Jinja"  ,"Kaberamaido", "Kaliro"  ,    "Kamuli" ,     "Kapchorwa"  , "Kapelebyong" ,"Katakwi"  ,   "Kibuku", "Kumim",       "Kween" ,      "Luuka",       "Manafwa" ,    "Mayuge",      "Mbale",       "Namayingo", "Namisindwa",  "Namutumba" ,  "Ngora" ,      "Pallisa" ,    "Serere" ,     "Sironko" ,    "Soroti" ,"Tororo" ) ~ "Eastern", 
       District %in% c("Buhweju", "Buliisa","Bundibugyo","Bunyangabu","Bushenyi","Hoima" ,"Ibanda",
                       "Isingiro" ,"Kabale" , "Kabarole" ,"Kagadi" ,"Kakumiro" ,"Kamwenge","Kanungu",
-                      "Kasese" ,"Kazo", "Kibaale","Kikuube" ,"Kiruhura","Kiryandongo", "Kisoro", "Kitagwenda",  "Kyegegwa", "Kyenjojo", "Masindi" ,"Mbarara","Mitooma","Ntoroko" , "Ntungamo" ,   "Rubanda"  ,   "Rubirizi" ,   "Rukiga" ,     "Rukungiri" ,  "Rwampara" ,   "Sheema") ~ "Western"
-    ))
+                      "Kasese" ,"Kazo", "Kibaale","Kikuube" ,"Kiruhura","Kiryandongo", "Kisoro", "Kitagwenda",  "Kyegegwa", "Kyenjojo", "Masindi" ,"Mbarara","Mitooma","Ntoroko" , "Ntungamo" ,   "Rubanda"  ,   "Rubirizi" ,   "Rukiga" ,     "Rukungiri" ,  "Rwampara" ,   "Sheema") ~ "Western"))
 
-ug_secondaryNER <-read_csv(here("data", "NER_Secondary_Enrollment_Rates_By_District.csv"), na = "-", 
+
+#trying to get years into a date
+
+ug_secondaryGER <- ug_secondaryGER_raw %>% 
+  mutate(Years = as.Date(Years, format = "%Y"))
+
+
+
+
+
+ug_secondaryNER_raw <-read_csv(here("data", "Secondary_NER_Rates.csv"), 
+                           na = "-", 
                            col_types = cols(`2012` = col_number(), 
                                             `2013` = col_number(), 
                                             `2014` = col_number(), 
@@ -48,16 +56,21 @@ ug_secondaryNER <-read_csv(here("data", "NER_Secondary_Enrollment_Rates_By_Distr
                                             `2016` = col_number(),
                                             `2017` = col_number())) %>% 
   pivot_longer(!District, names_to = "Years", values_to = "NER") %>% 
-   mutate(
-    region = case_when(
+  mutate(region = case_when(
       District %in% c("Abim","Adjumani", "Agago", "Alebtong", "Amolatar", "Amudat", "Amuru", "Apac", "Arua", "Dokolo", "Gulu", "Kaabong", "Kitgum", "Koboko"  , "Kole", 	"Kotido", "Lamwo",	"Lira", "Maracha",	"Moroto", "Moyo",	"Nakapiripirit", "Napak",	"Nebbi", "Nwoya",	"Otuke", "Oyam",	"Pader",	"Yumbe",	"Zombo")  ~ "Northern", 
       
       District %in% c("Buikwe", "Bukomansimbi", "Butambala", "Buvuma", "Gomba", "Kalangala", "Kalungu", "Kampala", "Kasanda", "Kayunga", "Kiboga", "Kyankwanzi", "Kyotera", "Luweero", "Lwengo", "Lyantonde", "Masaka", "Mityana", "Mpigi", "Mubende", "Mukono", "Nakaseke", "Nakasongola", "Rakai", "Sembabule", "Wakiso") ~ "Central",
       District %in% c("Amuria", "Budaka", "Bududa", "Bugiri", "Bugweri", "Bukedea", "Bukwo", "Bulambuli",   "Busia",       "Butaleja",    "Butebo" ,    "Buyende"  ,   "Iganga"  ,    "Jinja"  ,"Kaberamaido", "Kaliro"  ,    "Kamuli" ,     "Kapchorwa"  , "Kapelebyong" ,"Katakwi"  ,   "Kibuku", "Kumim",       "Kween" ,      "Luuka",       "Manafwa" ,    "Mayuge",      "Mbale",       "Namayingo", "Namisindwa",  "Namutumba" ,  "Ngora" ,      "Pallisa" ,    "Serere" ,     "Sironko" ,    "Soroti" ,"Tororo" ) ~ "Eastern", 
       District %in% c("Buhweju", "Buliisa","Bundibugyo","Bunyangabu","Bushenyi","Hoima" ,"Ibanda",
                       "Isingiro" ,"Kabale" , "Kabarole" ,"Kagadi" ,"Kakumiro" ,"Kamwenge","Kanungu",
-                      "Kasese" ,"Kazo", "Kibaale","Kikuube" ,"Kiruhura","Kiryandongo", "Kisoro", "Kitagwenda",  "Kyegegwa", "Kyenjojo", "Masindi" ,"Mbarara","Mitooma","Ntoroko" , "Ntungamo" ,   "Rubanda"  ,   "Rubirizi" ,   "Rukiga" ,     "Rukungiri" ,  "Rwampara" ,   "Sheema") ~ "Western"
-    ))
+                      "Kasese" ,"Kazo", "Kibaale","Kikuube" ,"Kiruhura","Kiryandongo", "Kisoro", "Kitagwenda",  "Kyegegwa", "Kyenjojo", "Masindi" ,"Mbarara","Mitooma","Ntoroko" , "Ntungamo" ,   "Rubanda"  ,   "Rubirizi" ,   "Rukiga" ,     "Rukungiri" ,  "Rwampara" ,   "Sheema") ~ "Western"))
+
+
+#trying to get years into a date
+
+ug_secondaryNER <- ug_secondaryNER_raw %>% 
+  mutate(Years = as.Date(Years, format = "%Y"))
+
 ```
 
 
@@ -66,25 +79,57 @@ ug_secondaryNER <-read_csv(here("data", "NER_Secondary_Enrollment_Rates_By_Distr
 
 wfp_food_prices_uga_raw <- read_csv("data/wfp_food_prices_uga.csv", 
     col_types = cols(admin2 = col_skip(), 
-        latitude = col_skip(), longitude = col_skip(), 
-        category = col_skip())) %>% 
-  mutate(date = lubridate::ymd(date))
+        latitude = col_skip(), 
+        longitude = col_skip(), 
+        category = col_skip(), 
+        curreny = col_skip(),
+        pricetype = col_skip(),
+        usdprice = col_number(),
+        date = col_date(format = "%Y-%m-%d"))) %>% 
+   mutate(region = case_when(
+      admin1 %in% c("Abim","Adjumani", "Agago", "Alebtong", "Amolatar", "Amudat", "Amuru", "Apac", "Arua", "Dokolo", "Gulu", "Kaabong", "Kitgum", "Koboko"  , "Kole", 	"Kotido", "Lamwo",	"Lira", "Maracha",	"Moroto", "Moyo",	"Nakapiripirit", "Napak",	"Nebbi", "Nwoya",	"Otuke", "Oyam",	"Pader",	"Yumbe",	"Zombo")  ~ "Northern", 
+      
+      admin1 %in% c("Buikwe", "Bukomansimbi", "Butambala", "Buvuma", "Gomba", "Kalangala", "Kalungu", "Kampala", "Kasanda", "Kayunga", "Kiboga", "Kyankwanzi", "Kyotera", "Luweero", "Lwengo", "Lyantonde", "Masaka", "Mityana", "Mpigi", "Mubende", "Mukono", "Nakaseke", "Nakasongola", "Rakai", "Sembabule", "Wakiso") ~ "Central",
+      admin1 %in% c("Amuria", "Budaka", "Bududa", "Bugiri", "Bugweri", "Bukedea", "Bukwo", "Bulambuli",   "Busia",       "Butaleja",    "Butebo" ,    "Buyende"  ,   "Iganga"  ,    "Jinja"  ,"Kaberamaido", "Kaliro"  ,    "Kamuli" ,     "Kapchorwa"  , "Kapelebyong" ,"Katakwi"  ,   "Kibuku", "Kumim",       "Kween" ,      "Luuka",       "Manafwa" ,    "Mayuge",      "Mbale",       "Namayingo", "Namisindwa",  "Namutumba" ,  "Ngora" ,      "Pallisa" ,    "Serere" ,     "Sironko" ,    "Soroti" ,"Tororo" ) ~ "Eastern", 
+      admin1 %in% c("Buhweju", "Buliisa","Bundibugyo","Bunyangabu","Bushenyi","Hoima" ,"Ibanda",
+                      "Isingiro" ,"Kabale" , "Kabarole" ,"Kagadi" ,"Kakumiro" ,"Kamwenge","Kanungu",
+                      "Kasese" ,"Kazo", "Kibaale","Kikuube" ,"Kiruhura","Kiryandongo", "Kisoro", "Kitagwenda",  "Kyegegwa", "Kyenjojo", "Masindi" ,"Mbarara","Mitooma","Ntoroko" , "Ntungamo" ,   "Rubanda"  ,   "Rubirizi" ,   "Rukiga" ,     "Rukungiri" ,  "Rwampara" ,   "Sheema") ~ "Western")) %>% 
+  subset(date> "2012-01-01" & date < "2017-12-31") 
 
-fp <- wfp_food_prices_uga_raw[-1,]
+fp_raw <- wfp_food_prices_uga_raw[-1,] 
 
-#%>% 
-  filter(date >= as.Date("2012-01-01") & date <= as.Date(2017-12-31))
+fp_year <- fp_raw %>% 
+  mutate(date = format(as.Date(date, format = "%Y-%m-%d"), "%Y"))
+
+
+fp <- fp_year %>% 
+  group_by(date, region, commodity) %>%
+    summarise(a_sum=sum(usdprice),
+            a_mean=(mean(usdprice))) %>% 
+  mutate(date = as.Date(date, format = "%Y"))
+
+
+#food and secondary school!
+
+
+school_food <- full_join(ug_secondaryGER, fp, by = c("Years" = "date", "region")) 
+
+school_food_time <- school_food %>% 
+  mutate(Years = format(as.Date(Years, format = "%Y-%m-%d"), "%Y"))
+  
+
 ```
 
 ```{r}
-
+#primary school aged kids 
 primary <-read_csv(here("data", "Primary_13-16.csv"))
 ```
 
 
 ```{r}
+# plotting the data
 ggplot(data = primary, aes(x = Year, y = Number, col = Schooling)) +
-  geom_point() +
+  geom_line() +
   theme_minimal() +
   scale_y_log10(
     "Total students enrolled",
@@ -93,16 +138,42 @@ ggplot(data = primary, aes(x = Year, y = Number, col = Schooling)) +
        y = "Total students enrolled",
        title = "Uganda Primary School Enrollment by Year")
 ```
+### Stuff to say about this figure 
 
+This figure shows us the total enrollment rate for p1-p7 (Kindergarten thru 6th grade) for Uganda. The general trend shows that as the grade level increases there is a decrease in the total number of students enrolled. This is consistent with trends in teh literature, where in many districts as children grow older they are expected to stay home and work or take care of children. The literature states that this is even more apparent for girls. The main barrier is poverty as parents are not able to afford to pay for school fees. But even in families where funds are available girls still fail to advance academically. Girls are expected to help with household chores and their irregular attendance at school leads to a failure in passing year-end exams. Not passing means they are held back and must repeat a grade. Once a girl starts menstruating lack of access to menstrual pads lead to more days missed and before long many girls drop out completely. With few other options the trend is for girls to marry early and have children at a young age. These children are in turn less likely to complete primary education and the perpetuation of the issue continues.
 
 ```{r}
-ggplot(data = ug_secondaryGER, aes(x = Years, y = GER, col = region)) +
+ggplot(data = subset(ug_secondaryGER, !is.na(region)), aes(x = Years, y = GER, col = region)) +
   geom_point() +
   theme_minimal() +
    labs(x = "Year",
        y = "Gross Enrollment Rate",
        title = "Rate of Secondary School Enrollment by Region")
+
+ggplot(data = subset(ug_secondaryNER, !is.na(region)), aes(x = Years, y = NER, col = region)) +
+  geom_point() +
+  theme_minimal() +
+   labs(x = "Year",
+       y = "Net Enrollment Rate",
+       title = "Rate of Secondary School Enrollment by Region")
+
 ```
+
+
+```{r}
+ggplot(data = subset(school_food_time, !is.na(region)), aes(x = Years, y = GER, col = region)) +
+  geom_point() +
+  theme_minimal() +
+   labs(x = "Year",
+       y = "Gross Enrollment Rate",
+       title = "Rate of Secondary School Enrollment by Region")
+
+ ggplot(data = subset(school_food_time, !is.na(region))) +
+  geom_line(aes(x = Years, y = a_mean, col = commodity)) 
+
+```
+
+
 
 ```{r}
 #will disrtict hav ean affect on number of children who attend school?
@@ -110,7 +181,9 @@ ggplot(data = ug_secondaryGER, aes(x = Years, y = GER, col = region)) +
  lm(GER ~ District, data = ug_secondaryGER)  %>%
   summary() %>% 
   xtable() %>% 
-  kable(caption = "Think Of a Captaion", digits = 4)
+  kable(caption = "Think Of a Captaion", digits = 4) %>% 
+  kable_styling(latex_options = "HOLD_position")
+
 
 ```
 
