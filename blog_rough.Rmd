@@ -19,8 +19,16 @@ librarian::shelf(
 
 ```{r}
 #Uganda Beauro of Stats 
-ug_secondaryGER <-read_csv(here("data", "GER_Secondary_Enrollment_Rates_By_District.csv"), na = "-") %>% pivot_longer(!District, names_to = "Years", values_to = "GER") %>% 
-  mutate(Years = lubridate::Y(Years))
+ug_secondaryGER <-read_csv(here("data", "GER_Secondary_Enrollment_Rates_By_District.csv"), 
+                           na.omit("region"),
+                           na = "-", 
+                           col_types = cols(`2012` = col_number(), 
+                                            `2013` = col_number(), 
+                                            `2014` = col_number(), 
+                                            `2015` = col_number(), 
+                                            `2016` = col_number(),
+                                            `2017` = col_number())) %>% 
+  pivot_longer(!District, names_to = "Years", values_to = "GER") %>% 
   mutate(
     region = case_when(
       District %in% c("Abim","Adjumani", "Agago", "Alebtong", "Amolatar", "Amudat", "Amuru", "Apac", "Arua", "Dokolo", "Gulu", "Kaabong", "Kitgum", "Koboko"  , "Kole", 	"Kotido", "Lamwo",	"Lira", "Maracha",	"Moroto", "Moyo",	"Nakapiripirit", "Napak",	"Nebbi", "Nwoya",	"Otuke", "Oyam",	"Pader",	"Yumbe",	"Zombo")  ~ "Northern", 
@@ -32,7 +40,14 @@ ug_secondaryGER <-read_csv(here("data", "GER_Secondary_Enrollment_Rates_By_Distr
                       "Kasese" ,"Kazo", "Kibaale","Kikuube" ,"Kiruhura","Kiryandongo", "Kisoro", "Kitagwenda",  "Kyegegwa", "Kyenjojo", "Masindi" ,"Mbarara","Mitooma","Ntoroko" , "Ntungamo" ,   "Rubanda"  ,   "Rubirizi" ,   "Rukiga" ,     "Rukungiri" ,  "Rwampara" ,   "Sheema") ~ "Western"
     ))
 
-ug_secondaryNER <-read_csv(here("data", "NER_Secondary_Enrollment_Rates_By_District.csv"), na = "-") %>% pivot_longer(!District, names_to = "Years", values_to = "NER") %>% 
+ug_secondaryNER <-read_csv(here("data", "NER_Secondary_Enrollment_Rates_By_District.csv"), na = "-", 
+                           col_types = cols(`2012` = col_number(), 
+                                            `2013` = col_number(), 
+                                            `2014` = col_number(), 
+                                            `2015` = col_number(), 
+                                            `2016` = col_number(),
+                                            `2017` = col_number())) %>% 
+  pivot_longer(!District, names_to = "Years", values_to = "NER") %>% 
    mutate(
     region = case_when(
       District %in% c("Abim","Adjumani", "Agago", "Alebtong", "Amolatar", "Amudat", "Amuru", "Apac", "Arua", "Dokolo", "Gulu", "Kaabong", "Kitgum", "Koboko"  , "Kole", 	"Kotido", "Lamwo",	"Lira", "Maracha",	"Moroto", "Moyo",	"Nakapiripirit", "Napak",	"Nebbi", "Nwoya",	"Otuke", "Oyam",	"Pader",	"Yumbe",	"Zombo")  ~ "Northern", 
@@ -61,23 +76,6 @@ fp <- wfp_food_prices_uga_raw[-1,]
   filter(date >= as.Date("2012-01-01") & date <= as.Date(2017-12-31))
 ```
 
-P7_comp	Male 	2013	68
-P7_comp	Male 	2014	72
-P7_comp	Male 	2015	60
-P7_comp	Male 	2016	60
-P7_comp	Female	2013	67
-P7_comp	Female	2014	72
-P7_comp	Female	2015	63
-P7_comp	Female	2016	63
-S1_trans	Male 	2013	72
-S1_trans	Male 	2014	71
-S1_trans	Male 	2015	63
-S1_trans	Male 	2016	64
-S1_trans	Female	2013	72
-S1_trans	Female	2014	71
-S1_trans	Female	2015	64
-S1_trans	Female	2016	65
-
 ```{r}
 
 primary <-read_csv(here("data", "Primary_13-16.csv"))
@@ -86,26 +84,48 @@ primary <-read_csv(here("data", "Primary_13-16.csv"))
 
 ```{r}
 ggplot(data = primary, aes(x = Year, y = Number, col = Schooling)) +
-  geom_point()
+  geom_point() +
+  theme_minimal() +
+  scale_y_log10(
+    "Total students enrolled",
+    labels = scales::label_number_si()) +
+   labs(x = "Year",
+       y = "Total students enrolled",
+       title = "Uganda Primary School Enrollment by Year")
 ```
 
 
 ```{r}
 ggplot(data = ug_secondaryGER, aes(x = Years, y = GER, col = region)) +
-  geom_point() 
+  geom_point() +
+  theme_minimal() +
+   labs(x = "Year",
+       y = "Gross Enrollment Rate",
+       title = "Rate of Secondary School Enrollment by Region")
 ```
 
 ```{r}
- lm(GER ~ region, data = ug_secondaryGER)  %>%
+#will disrtict hav ean affect on number of children who attend school?
+
+ lm(GER ~ District, data = ug_secondaryGER)  %>%
   summary() %>% 
   xtable() %>% 
   kable(caption = "Think Of a Captaion", digits = 4)
 
-lm(GER ~ Years, data = ug_secondaryGER) #need to turn dates into numeric 
-
 ```
 
 ```{r}
+#Will the year have an effect on number of children who attend school?
+
+lm(GER ~ Years, data = ug_secondaryGER) %>% 
+  summary()
+```
+
+
+
+```{r}
+
+
  lm(Number ~ Sex + Schooling, data = primary)  %>% 
   summary()
   
